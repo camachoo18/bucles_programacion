@@ -8,21 +8,20 @@ public class Whiles : MonoBehaviour
     [SerializeField] List<Transform> Points;
     [SerializeField] List<Color> Colors;
     [SerializeField] AnimationCurve ease;
-
-    Material  material;
-
     [SerializeField] float AnimationDuration;
-    float seconds = 0f;
-    //int currentPointIndex = 0;
+
+    Material material;
+
+   
     int startPointIndex = 0;
     int endPointIndex = 1;
+
     void Start()
     {
-        StartCoroutine(Letter());
+        material = ObjectToMove.GetComponent<MeshRenderer>().material;
         StartCoroutine(CountDuration());
     }
-
-    IEnumerator Letter()
+   /* IEnumerator Letter()
     {
         int frameCount = 0;
 
@@ -32,37 +31,50 @@ public class Whiles : MonoBehaviour
             //print("a: " + frameCount);
             yield return new WaitForEndOfFrame();
         }
-    }
-
-
+    }*/
     IEnumerator CountDuration()
     {
+        float elapsedTime;
+
         while (true)
         {
-            seconds = 0f;
+            elapsedTime = 0;
 
-            while (seconds < AnimationDuration)
+            while (elapsedTime < AnimationDuration)
             {
-                seconds += Time.deltaTime;
-               
-                ObjectToMove.position = Vector3.Lerp(Points[startPointIndex].position, Points[endPointIndex].position, ease.Evaluate(seconds / AnimationDuration));
-                ObjectToMove.GetComponent<Renderer>().material.color = Color.Lerp(Colors[startPointIndex], Colors[endPointIndex], ease.Evaluate(seconds / AnimationDuration));
+                elapsedTime += Time.deltaTime;
 
-                
-                Quaternion startRotation = Points[startPointIndex].rotation;
-                Quaternion endRotation = Points[endPointIndex].rotation;
-                ObjectToMove.rotation = Quaternion.Lerp(startRotation, endRotation, ease.Evaluate(seconds / AnimationDuration));
+                //.LerpUnclamped es un tipo de interpolacion que permite exceder los valores iniciales y finales, es decir que los supera. es algo mas suave y continuo, pero puede pasar los 
+                 // limites que pongamos, en este caso avanza un poco mas de los limites que ponemos.
+
+                ObjectToMove.position = Vector3.LerpUnclamped(
+                    Points[startPointIndex].position,
+                    Points[endPointIndex].position,
+                    ease.Evaluate(elapsedTime / AnimationDuration)
+                );
+                ObjectToMove.rotation = Quaternion.LerpUnclamped(
+                    Points[startPointIndex].rotation,
+                    Points[endPointIndex].rotation,
+                    ease.Evaluate(elapsedTime / AnimationDuration)
+                );
+                material.color = Color.LerpUnclamped(
+                    Colors[startPointIndex],
+                    Colors[endPointIndex],
+                    ease.Evaluate(elapsedTime / AnimationDuration)
+                );
 
                 yield return null;
             }
 
             UpdatePointIndices();
+
+            yield return null;
         }
     }
 
     void UpdatePointIndices()
     {
         startPointIndex = endPointIndex;
-        endPointIndex = (startPointIndex + 1) % Points.Count;
+        endPointIndex = (endPointIndex + 1) % Points.Count;
     }
 }
