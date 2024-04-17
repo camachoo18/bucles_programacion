@@ -5,12 +5,17 @@ using UnityEngine;
 public class Board : MonoBehaviour
 {
     [SerializeField] GameObject tile;
-    [SerializeField] int boardWidth;
-    [SerializeField] int boardHeight;
-    [SerializeField] float timeBetweenSpawns;
-    [SerializeField] float timeBetweenAnimations = 0.1f;
+    [SerializeField] int boardWidth = 9;
+    [SerializeField] int boardHeight = 5;
+    [SerializeField] float timeBetweenSpawns = 0.1f;
 
-    Vector3 cordinates;
+    [SerializeField] float xRotationVelocity = 5;
+    [SerializeField] float yRotationVelocity = 7;
+    [SerializeField] float timeBetweenAnimations = 0.1f;
+    [SerializeField] float xColorVelocity = 2.3f;
+    [SerializeField] float yColorVelocity = 2.9f;
+
+
 
     List<TileAnimation> tiles;
 
@@ -18,53 +23,71 @@ public class Board : MonoBehaviour
     {
         tiles = new List<TileAnimation>();
 
-         Camera.main.transform.position = new Vector3(
-            (boardWidth - 1) * 2.5f,
-            (boardHeight - 1) * 2.5f,
-            -(boardHeight - 1) * 2.5f
-            );
+        Camera.main.transform.position = new Vector3(
+            (boardWidth - 1) * 0.5f,
+            (boardHeight - 1) * 0.75f,
+            -(boardHeight - 1) * 0.5f
+        );
         Camera.main.transform.LookAt(new Vector3(
             (boardWidth - 1) * 0.5f,
             0,
             (boardHeight - 1) * 0.5f
-            ));
+        ));
 
-
-        StartCoroutine(SpawnObj());
+        StartCoroutine(InstantiateTiles());
         StartCoroutine(TileAnimations());
     }
 
-    void Update()
-    {
 
-    }
 
-    IEnumerator SpawnObj()
+
+    IEnumerator InstantiateTiles()
     {
+        TileAnimation tileanimation;
+
         for (int i = 0; i < boardWidth; i++)
-        {
             for (int j = 0; j < boardHeight; j++)
             {
-                Vector3 coordinates = new Vector3(i, 0, j);
-                InstantiatePrefab(tile, coordinates);
+                tileanimation = Instantiate(
+                    tile,
+                    new Vector3(i, 0, j),
+                    Quaternion.identity
+                ).GetComponent<TileAnimation>();
+
+                tileanimation.rotationSpeed = new Vector3(
+                    xRotationVelocity,
+                    yRotationVelocity,
+                        0
+                        );
+
+                tileanimation.X = i;
+                tileanimation.Y = j;
+                tileanimation.width = boardWidth;
+                tileanimation.height = boardHeight;
+                tileanimation.aSpeed = xColorVelocity;
+                tileanimation.bSpeed = yColorVelocity;
+
+
+                tiles.Add(tileanimation);
+
                 yield return new WaitForSeconds(timeBetweenSpawns);
             }
-        }
     }
-
-    void InstantiatePrefab(GameObject prefab, Vector3 position)
-    {
-        GameObject instantiatedObject = Instantiate(prefab, position, Quaternion.identity);
-    }
-
 
     IEnumerator TileAnimations()
     {
-        yield return new WaitForSeconds(timeBetweenSpawns); 
+        int current = 0;
 
-        for (int i = 0; i < tiles.Count; i++)
+        while (tiles.Count == 0)
+            yield return null;
+
+        while (true)
         {
-            StartCoroutine(tiles[i].TileAnimations());
+            tiles[current].MovementAnimation();
+            current++;
+            if (current >= tiles.Count)
+                current = 0;
+
             yield return new WaitForSeconds(timeBetweenAnimations);
         }
     }
