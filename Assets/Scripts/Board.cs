@@ -24,8 +24,8 @@ public class Board : MonoBehaviour
         tiles = new List<TileAnimation>();
 
         Camera.main.transform.position = new Vector3(
-            (boardWidth - 1) * 0.5f,
-            (boardHeight - 1) * 0.75f,
+            (boardWidth - 1) * 0.35f,
+            (boardHeight - 1) * 0.55f,
             -(boardHeight - 1) * 0.5f
         );
         Camera.main.transform.LookAt(new Vector3(
