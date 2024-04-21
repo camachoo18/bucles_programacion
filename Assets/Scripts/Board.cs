@@ -14,6 +14,7 @@ public class Board : MonoBehaviour
     [SerializeField] float timeBetweenAnimations = 0.1f;
     [SerializeField] float xColorVelocity = 2.3f;
     [SerializeField] float yColorVelocity = 2.9f;
+     [SerializeField] float boomDuration = 1;
 
 
 
@@ -36,6 +37,7 @@ public class Board : MonoBehaviour
 
         StartCoroutine(InstantiateTiles());
         StartCoroutine(TileAnimations());
+        StartCoroutine(boomAnimation());
     }
 
 
@@ -91,4 +93,18 @@ public class Board : MonoBehaviour
             yield return new WaitForSeconds(timeBetweenAnimations);
         }
     }
+    public IEnumerator boomAnimation()
+   {
+
+       while (true)
+       {
+           for(int i = 0; i < tiles.Count; i++)
+           {
+               tiles[i].MovementAnimation();
+               yield return null;
+           }
+
+           yield return new WaitForSeconds(boomDuration);
+       }
+   }
 }
